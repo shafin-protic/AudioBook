@@ -1,0 +1,1293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Makkah Taraweeh Audio Player</title>
+    <style>
+        :root {
+            --bg: #0f1115;
+            --surface: #181b21;
+            --surface-elevated: #222630;
+            --surface-border: #2c313d;
+            --primary: #9d72ff;
+            --primary-hover: #b08dff;
+            --primary-glow: rgba(157, 114, 255, 0.25);
+            --text-main: #f3f4f6;
+            --text-muted: #94a3b8;
+            --danger: #f87171;
+            --danger-bg: rgba(248, 113, 113, 0.1);
+            --accent-radio: #10b981;
+            --accent-radio-glow: rgba(16, 185, 129, 0.25);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 20px;
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body.light-theme {
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --surface-elevated: #f1f5f9;
+            --surface-border: #e2e8f0;
+            --primary: #7c3aed;
+            --primary-hover: #6d28d9;
+            --primary-glow: rgba(124, 58, 237, 0.18);
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --danger: #ef4444;
+            --danger-bg: rgba(239, 68, 68, 0.08);
+            --accent-radio: #059669;
+            --accent-radio-glow: rgba(5, 150, 105, 0.2);
+        }
+
+        * {
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            margin: 0;
+            padding: 32px 16px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .player-card {
+            width: 100%;
+            max-width: 580px;
+            background: var(--surface);
+            border: 1px solid var(--surface-border);
+            border-radius: var(--radius-lg);
+            padding: 28px;
+            box-shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.35);
+            animation: cardAppear 0.5s ease-out forwards;
+        }
+
+        @keyframes cardAppear {
+            from { opacity: 0; transform: translateY(12px) scale(0.99); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .title-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .title-group h1 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin: 0;
+            letter-spacing: -0.02em;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Equalizer Animation */
+        .wave-container {
+            display: flex;
+            align-items: flex-end;
+            gap: 3px;
+            height: 18px;
+        }
+
+        .wave-bar {
+            width: 3px;
+            background: var(--primary);
+            border-radius: 2px;
+            height: 4px;
+            transition: height 0.2s ease, background-color 0.3s ease;
+        }
+
+        .radio-active .wave-bar {
+            background: var(--accent-radio);
+        }
+
+        .playing .wave-bar:nth-child(1) { animation: wave 1s ease-in-out infinite 0.1s; }
+        .playing .wave-bar:nth-child(2) { animation: wave 1s ease-in-out infinite 0.3s; }
+        .playing .wave-bar:nth-child(3) { animation: wave 1s ease-in-out infinite 0.2s; }
+        .playing .wave-bar:nth-child(4) { animation: wave 1s ease-in-out infinite 0.4s; }
+
+        @keyframes wave {
+            0%, 100% { height: 4px; }
+            50% { height: 18px; }
+        }
+
+        .action-circle-btn {
+            background: var(--surface-elevated);
+            border: 1px solid var(--surface-border);
+            color: var(--text-main);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .action-circle-btn:hover {
+            border-color: var(--primary);
+            transform: scale(1.05);
+        }
+
+        .action-circle-btn.locked {
+            background: var(--danger-bg);
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        /* Status */
+        .status {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--primary);
+            display: inline-block;
+            transition: background 0.3s;
+        }
+
+        .status.radio-mode::before {
+            background: var(--accent-radio);
+            box-shadow: 0 0 6px var(--accent-radio);
+        }
+
+        /* Lock overlay & disabled states */
+        .lockable.is-locked {
+            opacity: 0.35 !important;
+            pointer-events: none !important;
+            user-select: none !important;
+            filter: grayscale(40%);
+            cursor: not-allowed !important;
+        }
+
+        /* Selectors */
+        .form-row {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 14px;
+        }
+
+        label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+        }
+
+        select {
+            width: 100%;
+            padding: 10px 14px;
+            background: var(--surface-elevated);
+            color: var(--text-main);
+            border: 1px solid var(--surface-border);
+            border-radius: var(--radius-md);
+            font-size: 0.9rem;
+            transition: var(--transition);
+            cursor: pointer;
+            appearance: none;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%2394a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>');
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            padding-right: 36px;
+        }
+
+        select:focus, select:hover {
+            border-color: var(--primary);
+        }
+
+        /* Track Progress */
+        .progress-group {
+            margin: 22px 0 16px;
+        }
+
+        .time-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.78rem;
+            font-variant-numeric: tabular-nums;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-webkit-slider-runnable-track {
+            height: 5px;
+            background: var(--surface-elevated);
+            border-radius: 99px;
+            transition: var(--transition);
+        }
+
+        input[type="range"]:hover::-webkit-slider-runnable-track {
+            background: var(--surface-border);
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 14px;
+            width: 14px;
+            border-radius: 50%;
+            background: var(--primary);
+            margin-top: -4.5px;
+            box-shadow: 0 0 10px var(--primary-glow);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        input[type="range"]:active::-webkit-slider-thumb {
+            transform: scale(1.25);
+        }
+
+        /* Center Audio Controls */
+        .player-controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin: 18px 0;
+        }
+
+        .btn-ctrl {
+            background: var(--surface-elevated);
+            border: 1px solid var(--surface-border);
+            color: var(--text-main);
+            height: 42px;
+            padding: 0 14px;
+            border-radius: var(--radius-md);
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-ctrl:hover {
+            border-color: var(--primary);
+            background: var(--surface);
+            transform: translateY(-1px);
+        }
+
+        .btn-ctrl:active {
+            transform: translateY(0);
+        }
+
+        .btn-ctrl.btn-main {
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            padding: 0;
+            background: var(--primary);
+            color: #ffffff;
+            border: none;
+            box-shadow: 0 6px 16px var(--primary-glow);
+            font-size: 1.1rem;
+        }
+
+        .btn-ctrl.btn-main:hover {
+            background: var(--primary-hover);
+            transform: scale(1.05);
+        }
+
+        /* Speed and Audio Properties Bar */
+        .extra-settings {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 14px;
+            background: var(--surface-elevated);
+            border-radius: var(--radius-md);
+            margin: 16px 0;
+        }
+
+        .speed-dock {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .speed-dock select {
+            width: auto;
+            padding: 4px 28px 4px 10px;
+            font-size: 0.8rem;
+            background-position: right 8px center;
+        }
+
+        .volume-dock {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+            max-width: 170px;
+        }
+
+        .volume-label {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            min-width: 32px;
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* Mode & Auxiliary Actions */
+        .secondary-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 10px;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 1px dashed var(--surface-border);
+            color: var(--text-muted);
+            padding: 8px 14px;
+            border-radius: var(--radius-sm);
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-secondary:hover {
+            color: var(--primary);
+            border-color: var(--primary);
+            background: var(--surface-elevated);
+        }
+
+        .btn-radio {
+            border: 1px solid var(--surface-border);
+            background: var(--surface-elevated);
+            color: var(--text-main);
+        }
+
+        .btn-radio.active {
+            background: var(--accent-radio-glow);
+            border-color: var(--accent-radio);
+            color: var(--accent-radio);
+            font-weight: 600;
+        }
+
+        /* Tabs Section */
+        .tabs-nav {
+            display: flex;
+            border-bottom: 1px solid var(--surface-border);
+            gap: 16px;
+            margin-bottom: 12px;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 8px 4px 12px;
+            font-size: 0.88rem;
+            font-weight: 500;
+            cursor: pointer;
+            position: relative;
+            transition: var(--transition);
+        }
+
+        .tab-btn:hover {
+            color: var(--text-main);
+        }
+
+        .tab-btn.active {
+            color: var(--primary);
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--primary);
+            border-radius: 2px;
+        }
+
+        .tab-panel {
+            display: none;
+            max-height: 220px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 12px;
+            border-radius: var(--radius-sm);
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-bottom: 4px;
+        }
+
+        .list-item:hover {
+            background: var(--surface-elevated);
+        }
+
+        .list-item .item-title {
+            font-weight: 500;
+            color: var(--text-main);
+        }
+
+        .list-item .item-subtitle {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .delete-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .delete-btn:hover {
+            color: var(--danger);
+            background: var(--danger-bg);
+        }
+
+        .empty-placeholder {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 24px 0;
+            font-size: 0.85rem;
+        }
+
+        /* Footer */
+        .footer-info {
+            text-align: center;
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            margin-top: 20px;
+            opacity: 0.8;
+        }
+
+        audio { display: none; }
+    </style>
+</head>
+<body>
+    <div class="player-card">
+        <header class="header">
+            <div class="title-group">
+                <div class="wave-container" id="equalizer">
+                    <span class="wave-bar"></span>
+                    <span class="wave-bar"></span>
+                    <span class="wave-bar"></span>
+                    <span class="wave-bar"></span>
+                </div>
+                <h1>Makkah Taraweeh</h1>
+            </div>
+            <div class="header-actions">
+                <button class="action-circle-btn" id="lockToggleBtn" title="Lock Controls">🔓</button>
+                <button class="action-circle-btn" id="themeToggleBtn" title="Toggle Theme">🌓</button>
+            </div>
+        </header>
+
+        <div class="status" id="status">Connecting to sync service...</div>
+
+        <audio id="audioPlayer" preload="auto"></audio>
+
+        <div class="form-row lockable">
+            <label for="collectionSelect">Series</label>
+            <select id="collectionSelect"></select>
+        </div>
+
+        <div class="form-row lockable">
+            <label for="chapterSelect">Chapter</label>
+            <select id="chapterSelect"></select>
+        </div>
+
+        <div class="progress-group lockable">
+            <div class="time-labels">
+                <span id="currentTimeDisplay">0:00</span>
+                <span id="durationDisplay">0:00</span>
+            </div>
+            <input type="range" id="seekSlider" min="0" max="100" value="0" step="0.1">
+        </div>
+
+        <div class="player-controls">
+            <button class="btn-ctrl lockable" id="prevChapterBtn" title="Previous Chapter">⏮</button>
+            <button class="btn-ctrl lockable" id="rewind10Btn" title="Rewind 10s">⏪ 10s</button>
+            <!-- Play/Pause is explicitly outside .lockable -->
+            <button class="btn-ctrl btn-main" id="playPauseBtn" title="Play / Pause">▶</button>
+            <button class="btn-ctrl lockable" id="forward10Btn" title="Forward 10s">10s ⏩</button>
+            <button class="btn-ctrl lockable" id="nextChapterBtn" title="Next Chapter">⏭</button>
+        </div>
+
+        <div class="extra-settings lockable">
+            <div class="speed-dock">
+                <label for="speedSelect" style="margin: 0;">Speed</label>
+                <select id="speedSelect">
+                    <option value="0.80">0.8x</option>
+                    <option value="0.85">0.85x</option>
+                    <option value="0.90">0.9x</option>
+                    <option value="0.95">0.95x</option>
+                    <option value="1" selected>1.0x</option>
+                    <option value="1.05">1.05x</option>
+                    <option value="1.10">1.1x</option>
+                    <option value="1.15">1.15x</option>
+                    <option value="1.2">1.2x</option>
+                    <option value="1.5">1.5x</option>
+                    <option value="2">2.0x</option>
+                </select>
+            </div>
+            <div class="volume-dock">
+                <span style="font-size: 0.85rem;">🔊</span>
+                <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="1">
+                <span class="volume-label" id="volumeLabel">100%</span>
+            </div>
+        </div>
+
+        <div class="secondary-actions">
+            <button class="btn-secondary btn-radio lockable" id="radioToggleBtn">📻 Radio Mode</button>
+            <button class="btn-secondary lockable" id="addBookmarkBtn">🔖 Add Bookmark</button>
+        </div>
+
+        <div class="tabs-nav lockable">
+            <button class="tab-btn active" data-tab="bookmarks">Bookmarks</button>
+            <button class="tab-btn" data-tab="history">History</button>
+        </div>
+
+        <div class="tab-panel active lockable" id="bookmarksTab">
+            <div class="empty-placeholder">No bookmarks saved yet.</div>
+        </div>
+        <div class="tab-panel lockable" id="historyTab">
+            <div class="empty-placeholder">No playback history yet.</div>
+        </div>
+
+        <div class="footer-info" id="syncTime"></div>
+    </div>
+
+    <script>
+        // --- CONFIGURATION ---
+        const GITHUB_TOKEN = "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";
+        const GIST_ID = "f1938617a1c17dd41fd0e53e3ff7d11d";
+        const GIST_FILENAME = "audiobook-state.json";
+        const AUDIO_CACHE_NAME = 'makkah-taraweeh-audio-v1';
+
+        const COLLECTIONS = [
+            { id: "MakkahTaraweeh1442", name: "Makkah Taraweeh 1442" },
+            { id: "MakkahTaraweeh1443", name: "Makkah Taraweeh 1443" }
+        ];
+
+        // --- STATE ---
+        let currentChapters = [];
+        let currentCollectionId = "";
+        let bookmarks = [];
+        let history = [];
+        let lastSyncedIndex = -1;
+        let lastSyncedTime = 0;
+        let isApplyingCloudState = false;
+        let syncDebounceTimer = null;
+        let isLocked = false;
+
+        // Radio State
+        let isRadioMode = false;
+        let radioTimer = null;
+        const RADIO_ROTATION_INTERVAL = 5 * 60 * 1000; // 5 minutes
+
+        // --- DOM ELEMENTS ---
+        const audio = document.getElementById('audioPlayer');
+        const chapterSelect = document.getElementById('chapterSelect');
+        const collectionSelect = document.getElementById('collectionSelect');
+        const statusDiv = document.getElementById('status');
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const seekSlider = document.getElementById('seekSlider');
+        const currentTimeDisplay = document.getElementById('currentTimeDisplay');
+        const durationDisplay = document.getElementById('durationDisplay');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const volumeLabel = document.getElementById('volumeLabel');
+        const speedSelect = document.getElementById('speedSelect');
+        const bookmarksTab = document.getElementById('bookmarksTab');
+        const historyTab = document.getElementById('historyTab');
+        const syncTimeDiv = document.getElementById('syncTime');
+        const equalizer = document.getElementById('equalizer');
+        const lockToggleBtn = document.getElementById('lockToggleBtn');
+        const radioToggleBtn = document.getElementById('radioToggleBtn');
+
+        // --- UTILITIES ---
+        function formatTime(seconds) {
+            if (isNaN(seconds) || !isFinite(seconds)) return "0:00";
+            const h = Math.floor(seconds / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            const s = Math.floor(seconds % 60);
+            if (h > 0) return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+            return `${m}:${s.toString().padStart(2, '0')}`;
+        }
+
+        function naturalSort(a, b) {
+            return a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' });
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        function formatChapterName(filename) {
+            let name = decodeURIComponent(filename);
+            name = name.replace(/[_\-.]+/g, ' ').trim();
+            name = name.replace(/\s+/g, ' ');
+            return name;
+        }
+
+        // --- CACHE & STREAMING UTILITIES ---
+        async function fetchWithCache(url) {
+            if (!('caches' in window)) return url;
+            try {
+                const cache = await caches.open(AUDIO_CACHE_NAME);
+                const matched = await cache.match(url);
+                if (matched) {
+                    const blob = await matched.blob();
+                    return URL.createObjectURL(blob);
+                }
+                // Fetch in background to populate cache for subsequent requests
+                fetch(url).then(response => {
+                    if (response.ok) cache.put(url, response.clone());
+                }).catch(() => {});
+            } catch (err) {
+                console.warn("Audio cache read warning:", err);
+            }
+            return url;
+        }
+
+        function prefetchAdjacentChapters(currentIndex) {
+            if (!('caches' in window) || currentChapters.length === 0) return;
+            const nextIdx = currentIndex + 1;
+            if (nextIdx < currentChapters.length) {
+                caches.open(AUDIO_CACHE_NAME).then(cache => {
+                    const nextUrl = currentChapters[nextIdx].url;
+                    cache.match(nextUrl).then(matched => {
+                        if (!matched) {
+                            fetch(nextUrl).then(res => {
+                                if (res.ok) cache.put(nextUrl, res);
+                            }).catch(() => {});
+                        }
+                    });
+                });
+            }
+        }
+
+        // --- LOCK MECHANISM ---
+        function toggleControlsLock() {
+            isLocked = !isLocked;
+            lockToggleBtn.textContent = isLocked ? "🔒" : "🔓";
+            lockToggleBtn.classList.toggle('locked', isLocked);
+            lockToggleBtn.title = isLocked ? "Unlock Controls" : "Lock Controls";
+
+            document.querySelectorAll('.lockable').forEach(el => {
+                el.classList.toggle('is-locked', isLocked);
+                if (el.tagName === 'INPUT' || el.tagName === 'SELECT' || el.tagName === 'BUTTON') {
+                    el.disabled = isLocked;
+                }
+            });
+            statusDiv.textContent = isLocked ? "Controls locked (Play/Pause active)." : "Controls unlocked.";
+        }
+
+        lockToggleBtn.addEventListener('click', toggleControlsLock);
+
+        // --- FETCH CONTENT ---
+        async function fetchChapterList(identifier) {
+            statusDiv.textContent = "Loading chapters from Archive.org...";
+            try {
+                const response = await fetch(`https://archive.org/metadata/${identifier}`);
+                if (!response.ok) throw new Error("Failed to fetch metadata");
+                const data = await response.json();
+                const files = data.files.filter(f => f.name.match(/\.(mp3|ogg|m4a|aac)$/i));
+                files.sort(naturalSort);
+
+                return files.map((f, idx) => {
+                    const rawName = f.name;
+                    const stripped = rawName.replace(/\.[^/.]+$/, "");
+                    const formatted = formatChapterName(rawName);
+
+                    let displayName;
+                    const isNumericOnly = /^\d+$/.test(stripped.replace(/[_\-\s]/g, ''));
+                    if (stripped.length < 4 || isNumericOnly) {
+                        displayName = `#${idx + 1} — ${formatted}`;
+                    } else {
+                        displayName = formatted;
+                    }
+
+                    return {
+                        name: displayName,
+                        fullName: rawName,
+                        url: `https://archive.org/download/${identifier}/${encodeURIComponent(rawName)}`
+                    };
+                });
+            } catch (error) {
+                console.error(error);
+                statusDiv.textContent = "Error loading Archive data. Check connection.";
+                return [];
+            }
+        }
+
+        // --- UI POPULATION ---
+        function populateCollectionSelect() {
+            collectionSelect.innerHTML = COLLECTIONS.map(c =>
+                `<option value="${c.id}">${c.name}</option>`
+            ).join('');
+        }
+
+        function populateChapterSelect(chapters) {
+            chapterSelect.innerHTML = '';
+            chapters.forEach((chapter, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = chapter.name;
+                option.title = chapter.fullName;
+                chapterSelect.appendChild(option);
+            });
+        }
+
+        async function loadChapter(index, autoPlay = false, seekOffset = null) {
+            if (!currentChapters[index]) return;
+            const chapter = currentChapters[index];
+            isApplyingCloudState = true;
+
+            const playbackSource = await fetchWithCache(chapter.url);
+            audio.src = playbackSource;
+            audio.load();
+            chapterSelect.value = index;
+            isApplyingCloudState = false;
+
+            if (seekOffset !== null) {
+                const applyOffset = () => {
+                    if (audio.duration && isFinite(audio.duration)) {
+                        audio.currentTime = Math.min(seekOffset, audio.duration - 1);
+                    }
+                };
+                if (audio.readyState >= 1) applyOffset();
+                else audio.addEventListener('loadedmetadata', applyOffset, { once: true });
+            }
+
+            if (autoPlay) {
+                audio.play().catch(e => console.log("Autoplay blocked:", e));
+            }
+
+            prefetchAdjacentChapters(index);
+        }
+
+        // --- RADIO MODE (5-MIN RANDOM AUTO-CYCLE) ---
+        function toggleRadioMode() {
+            isRadioMode = !isRadioMode;
+            radioToggleBtn.classList.toggle('active', isRadioMode);
+            statusDiv.classList.toggle('radio-mode', isRadioMode);
+            equalizer.classList.toggle('radio-active', isRadioMode);
+
+            if (isRadioMode) {
+                statusDiv.textContent = "📻 Radio Mode started (5m shuffle).";
+                playRandomRadioSegment();
+                radioTimer = setInterval(playRandomRadioSegment, RADIO_ROTATION_INTERVAL);
+            } else {
+                if (radioTimer) clearInterval(radioTimer);
+                statusDiv.textContent = "Radio Mode stopped.";
+            }
+        }
+
+        async function playRandomRadioSegment() {
+            if (COLLECTIONS.length === 0) return;
+
+            // Pick random collection
+            const randomColl = COLLECTIONS[Math.floor(Math.random() * COLLECTIONS.length)];
+            if (randomColl.id !== currentCollectionId) {
+                collectionSelect.value = randomColl.id;
+                currentCollectionId = randomColl.id;
+                currentChapters = await fetchChapterList(randomColl.id);
+                populateChapterSelect(currentChapters);
+            }
+
+            if (currentChapters.length === 0) return;
+
+            // Pick random chapter
+            const randomChapterIdx = Math.floor(Math.random() * currentChapters.length);
+            chapterSelect.value = randomChapterIdx;
+
+            const targetChapter = currentChapters[randomChapterIdx];
+            statusDiv.textContent = `📻 Radio: ${targetChapter.name}`;
+
+            const playUrl = await fetchWithCache(targetChapter.url);
+            audio.src = playUrl;
+            audio.load();
+
+            const onMetadataLoaded = () => {
+                if (audio.duration && isFinite(audio.duration) && audio.duration > 30) {
+                    // Random start position leaving at least 30 seconds
+                    const randomPoint = Math.random() * (audio.duration - 30);
+                    audio.currentTime = randomPoint;
+                }
+                audio.play().catch(e => console.log("Radio playback interrupted:", e));
+                audio.removeEventListener('loadedmetadata', onMetadataLoaded);
+            };
+
+            audio.addEventListener('loadedmetadata', onMetadataLoaded);
+        }
+
+        radioToggleBtn.addEventListener('click', toggleRadioMode);
+
+        // --- SYNC LOGIC ---
+        async function fetchCloudState() {
+            if (!GITHUB_TOKEN || !GIST_ID ||
+                GITHUB_TOKEN.startsWith("YOUR_") || GIST_ID.startsWith("YOUR_")) return null;
+            try {
+                const response = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+                    headers: {
+                        'Authorization': `Bearer ${GITHUB_TOKEN}`,
+                        'Accept': 'application/vnd.github+json'
+                    }
+                });
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const data = await response.json();
+                const file = data.files[GIST_FILENAME];
+                if (!file) return null;
+                if (file.truncated && file.raw_url) {
+                    const rawRes = await fetch(file.raw_url);
+                    return await rawRes.json();
+                }
+                return JSON.parse(file.content);
+            } catch (error) {
+                console.error("Gist fetch error:", error);
+                return null;
+            }
+        }
+
+        async function pushCloudState(state) {
+            if (isRadioMode) return; // Never sync during radio mode
+            if (!GITHUB_TOKEN || !GIST_ID ||
+                GITHUB_TOKEN.startsWith("YOUR_") || GIST_ID.startsWith("YOUR_")) {
+                syncTimeDiv.textContent = "Sync not configured. Set token & Gist ID.";
+                return;
+            }
+            try {
+                const response = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Authorization': `Bearer ${GITHUB_TOKEN}`,
+                        'Accept': 'application/vnd.github+json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        files: {
+                            [GIST_FILENAME]: {
+                                content: JSON.stringify(state, null, 2)
+                            }
+                        }
+                    })
+                });
+                if (response.ok) {
+                    const now = new Date().toLocaleTimeString();
+                    syncTimeDiv.textContent = `Auto-synced: ${now}`;
+                } else {
+                    syncTimeDiv.textContent = "Sync failed (HTTP error)";
+                }
+            } catch (error) {
+                console.error("Gist push error:", error);
+                syncTimeDiv.textContent = "Sync failed (network)";
+            }
+        }
+
+        function scheduleSync() {
+            if (isApplyingCloudState || isRadioMode) return;
+            if (syncDebounceTimer) clearTimeout(syncDebounceTimer);
+            syncDebounceTimer = setTimeout(() => {
+                syncState();
+            }, 3000);
+        }
+
+        async function syncState(force = false) {
+            if (isApplyingCloudState || isRadioMode) return;
+            const state = getCurrentState();
+            if (force || Math.abs(state.currentTime - lastSyncedTime) > 5 ||
+                state.chapterIndex !== lastSyncedIndex) {
+                await pushCloudState(state);
+                lastSyncedTime = state.currentTime;
+                lastSyncedIndex = state.chapterIndex;
+            }
+        }
+
+        // --- PLAYER EVENT HANDLERS ---
+        function updatePlayPauseUI() {
+            if (audio.paused) {
+                playPauseBtn.textContent = "▶";
+                equalizer.classList.remove('playing');
+            } else {
+                playPauseBtn.textContent = "⏸";
+                equalizer.classList.add('playing');
+            }
+        }
+
+        function updateSeekSlider() {
+            if (audio.duration && isFinite(audio.duration)) {
+                seekSlider.max = audio.duration;
+                seekSlider.value = audio.currentTime;
+                currentTimeDisplay.textContent = formatTime(audio.currentTime);
+                durationDisplay.textContent = formatTime(audio.duration);
+            }
+        }
+
+        audio.addEventListener('play', () => { 
+            updatePlayPauseUI(); 
+            if (!isRadioMode) statusDiv.textContent = "Playing..."; 
+        });
+
+        audio.addEventListener('pause', () => { 
+            updatePlayPauseUI(); 
+            if (!isRadioMode) scheduleSync(); 
+        });
+
+        audio.addEventListener('timeupdate', updateSeekSlider);
+
+        audio.addEventListener('loadedmetadata', () => {
+            updateSeekSlider();
+            // Don't register to history if Radio Mode is on
+            if (!isRadioMode && !isApplyingCloudState && currentCollectionId && currentChapters[chapterSelect.value]) {
+                addToHistory();
+            }
+        });
+
+        audio.addEventListener('ended', () => {
+            if (isRadioMode) {
+                playRandomRadioSegment();
+                return;
+            }
+            const nextIndex = parseInt(chapterSelect.value) + 1;
+            if (nextIndex < currentChapters.length) {
+                statusDiv.textContent = "Auto-playing next chapter...";
+                loadChapter(nextIndex, true);
+            } else {
+                statusDiv.textContent = "End of series reached.";
+            }
+            scheduleSync();
+        });
+
+        audio.preservesPitch = true;
+        if (audio.mozPreservesPitch !== undefined) audio.mozPreservesPitch = true;
+        if (audio.webkitPreservesPitch !== undefined) audio.webkitPreservesPitch = true;
+
+        playPauseBtn.addEventListener('click', () => {
+            if (audio.paused) audio.play(); else audio.pause();
+        });
+
+        seekSlider.addEventListener('input', () => {
+            audio.currentTime = parseFloat(seekSlider.value);
+            currentTimeDisplay.textContent = formatTime(audio.currentTime);
+        });
+        seekSlider.addEventListener('change', () => scheduleSync());
+
+        volumeSlider.addEventListener('input', () => {
+            audio.volume = parseFloat(volumeSlider.value);
+            volumeLabel.textContent = Math.round(audio.volume * 100) + "%";
+            scheduleSync();
+        });
+
+        chapterSelect.addEventListener('change', (e) => {
+            loadChapter(parseInt(e.target.value));
+            scheduleSync();
+        });
+
+        collectionSelect.addEventListener('change', async (e) => {
+            await switchCollection(e.target.value);
+            scheduleSync();
+        });
+
+        document.getElementById('prevChapterBtn').addEventListener('click', () => {
+            const idx = parseInt(chapterSelect.value) - 1;
+            if (idx >= 0) loadChapter(idx, !audio.paused);
+        });
+        document.getElementById('nextChapterBtn').addEventListener('click', () => {
+            const idx = parseInt(chapterSelect.value) + 1;
+            if (idx < currentChapters.length) loadChapter(idx, !audio.paused);
+        });
+
+        document.getElementById('rewind10Btn').addEventListener('click', () => { 
+            audio.currentTime = Math.max(audio.currentTime - 10, 0); 
+        });
+        document.getElementById('forward10Btn').addEventListener('click', () => { 
+            audio.currentTime = Math.min(audio.currentTime + 10, audio.duration || 0); 
+        });
+
+        speedSelect.addEventListener('change', (e) => {
+            audio.playbackRate = parseFloat(e.target.value);
+            scheduleSync();
+        });
+
+        // Tabs
+        document.querySelectorAll('.tab-btn').forEach(tab => {
+            tab.addEventListener('click', () => {
+                if (isLocked) return;
+                document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-panel').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab + 'Tab').classList.add('active');
+            });
+        });
+
+        // Theme toggle
+        document.getElementById('themeToggleBtn').addEventListener('click', () => {
+            document.body.classList.toggle('light-theme');
+        });
+
+        // Add bookmark
+        document.getElementById('addBookmarkBtn').addEventListener('click', () => {
+            if (!currentChapters[chapterSelect.value]) return;
+            const note = prompt("Enter a note for this bookmark (optional):", "") || "";
+            const bookmark = {
+                id: Date.now(),
+                collectionId: currentCollectionId,
+                chapterIndex: parseInt(chapterSelect.value),
+                chapterName: currentChapters[chapterSelect.value].name,
+                time: audio.currentTime,
+                note: note,
+                createdAt: new Date().toLocaleDateString()
+            };
+            bookmarks.unshift(bookmark);
+            renderBookmarks();
+            scheduleSync();
+            statusDiv.textContent = "Bookmark added.";
+        });
+
+        // --- BOOKMARKS & HISTORY ---
+        function renderBookmarks() {
+            if (bookmarks.length === 0) {
+                bookmarksTab.innerHTML = '<div class="empty-placeholder">No bookmarks saved yet.</div>';
+                return;
+            }
+            bookmarksTab.innerHTML = bookmarks.map(bm => `
+                <div class="list-item" data-id="${bm.id}">
+                    <div>
+                        <div class="item-title">${escapeHtml(bm.chapterName)} <span style="color:var(--primary); font-weight:normal;">(${formatTime(bm.time)})</span></div>
+                        ${bm.note ? `<div class="item-subtitle">📝 ${escapeHtml(bm.note)}</div>` : ''}
+                    </div>
+                    <button class="delete-btn" data-delete="${bm.id}" title="Delete">✕</button>
+                </div>
+            `).join('');
+        }
+
+        function renderHistory() {
+            if (history.length === 0) {
+                historyTab.innerHTML = '<div class="empty-placeholder">No playback history yet.</div>';
+                return;
+            }
+            historyTab.innerHTML = history.slice(0, 30).map(h => `
+                <div class="list-item" data-history-id="${h.id}">
+                    <div>
+                        <div class="item-title">${escapeHtml(h.chapterName)}</div>
+                        <div class="item-subtitle">${escapeHtml(h.collectionId)} • ${h.timePlayed}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        bookmarksTab.addEventListener('click', async (e) => {
+            if (isLocked) return;
+            const delBtn = e.target.closest('[data-delete]');
+            if (delBtn) {
+                const id = parseInt(delBtn.dataset.delete);
+                bookmarks = bookmarks.filter(b => b.id !== id);
+                renderBookmarks();
+                scheduleSync();
+                return;
+            }
+            const item = e.target.closest('.list-item');
+            if (item && item.dataset.id) {
+                const bm = bookmarks.find(b => b.id === parseInt(item.dataset.id));
+                if (!bm) return;
+                if (isRadioMode) toggleRadioMode(); // Exit radio if manual bookmark chosen
+                if (bm.collectionId !== currentCollectionId) {
+                    collectionSelect.value = bm.collectionId;
+                    await switchCollection(bm.collectionId);
+                }
+                if (currentChapters[bm.chapterIndex]) {
+                    loadChapter(bm.chapterIndex, true, bm.time);
+                }
+            }
+        });
+
+        historyTab.addEventListener('click', async (e) => {
+            if (isLocked) return;
+            const item = e.target.closest('[data-history-id]');
+            if (!item) return;
+            const h = history.find(x => x.id === parseInt(item.dataset.historyId));
+            if (!h) return;
+            if (isRadioMode) toggleRadioMode();
+            if (h.collectionId !== currentCollectionId) {
+                collectionSelect.value = h.collectionId;
+                await switchCollection(h.collectionId);
+            }
+            loadChapter(h.chapterIndex, true);
+        });
+
+        function addToHistory() {
+            if (isRadioMode) return;
+            const chapter = currentChapters[chapterSelect.value];
+            if (!chapter) return;
+            history = history.filter(h => !(h.collectionId === currentCollectionId && h.chapterIndex === chapterSelect.value));
+            history.unshift({
+                id: Date.now(),
+                collectionId: currentCollectionId,
+                chapterIndex: chapterSelect.value,
+                chapterName: chapter.name,
+                timePlayed: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            });
+            history = history.slice(0, 50);
+            renderHistory();
+        }
+
+        // --- SYNC COORDINATION ---
+        function getCurrentState() {
+            return {
+                collectionId: currentCollectionId,
+                chapterIndex: parseInt(chapterSelect.value) || 0,
+                currentTime: audio.currentTime || 0,
+                playbackRate: audio.playbackRate || 1.0,
+                volume: audio.volume,
+                bookmarks: bookmarks,
+                history: history,
+                timestamp: Date.now()
+            };
+        }
+
+        async function applyCloudState() {
+            statusDiv.textContent = "Checking saved progress...";
+            const cloudState = await fetchCloudState();
+
+            if (cloudState) {
+                bookmarks = cloudState.bookmarks || [];
+                history = cloudState.history || [];
+                renderBookmarks();
+                renderHistory();
+
+                if (cloudState.collectionId) {
+                    const collection = COLLECTIONS.find(c => c.id === cloudState.collectionId);
+                    if (collection) {
+                        collectionSelect.value = collection.id;
+                        currentChapters = await fetchChapterList(collection.id);
+                        currentCollectionId = collection.id;
+                        populateChapterSelect(currentChapters);
+
+                        isApplyingCloudState = true;
+                        loadChapter(cloudState.chapterIndex, false, cloudState.currentTime);
+                        audio.playbackRate = cloudState.playbackRate || 1.0;
+                        speedSelect.value = audio.playbackRate;
+                        if (cloudState.volume !== undefined) {
+                            audio.volume = cloudState.volume;
+                            volumeSlider.value = cloudState.volume;
+                            volumeLabel.textContent = Math.round(cloudState.volume * 100) + "%";
+                        }
+
+                        statusDiv.textContent = `Resumed: ${collection.name}`;
+                        return;
+                    }
+                }
+            }
+            statusDiv.textContent = "Ready.";
+            if (COLLECTIONS.length > 0) {
+                collectionSelect.value = COLLECTIONS[0].id;
+                await switchCollection(COLLECTIONS[0].id);
+            }
+        }
+
+        async function switchCollection(id) {
+            currentCollectionId = id;
+            currentChapters = await fetchChapterList(id);
+            populateChapterSelect(currentChapters);
+            if (currentChapters.length > 0) {
+                loadChapter(0);
+                statusDiv.textContent = `Loaded ${currentChapters.length} chapters.`;
+            } else {
+                statusDiv.textContent = "No audio files found.";
+            }
+        }
+
+        async function init() {
+            populateCollectionSelect();
+            collectionSelect.addEventListener('change', async (e) => {
+                await switchCollection(e.target.value);
+                scheduleSync();
+            });
+            await applyCloudState();
+
+            setInterval(() => {
+                if (!audio.paused && !isRadioMode) syncState();
+            }, 60000);
+
+            window.addEventListener('beforeunload', () => {
+                if (isRadioMode) return;
+                const state = getCurrentState();
+                navigator.sendBeacon(
+                    `https://api.github.com/gists/${GIST_ID}`,
+                    new Blob([JSON.stringify({ files: { [GIST_FILENAME]: { content: JSON.stringify(state) } } })], { type: 'application/json' })
+                );
+            });
+        }
+
+        init();
+    </script>
+</body>
+</html>
