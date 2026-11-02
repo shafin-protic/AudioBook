@@ -91,14 +91,6 @@
             gap: 12px;
         }
 
-        .library-icon {
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
-            object-fit: cover;
-            background: var(--surface-elevated);
-        }
-
         .title-group h1 {
             font-size: 1.25rem;
             font-weight: 600;
@@ -171,7 +163,7 @@
         .status {
             font-size: 0.82rem;
             color: var(--text-muted);
-            margin-bottom: 20px;
+            margin-bottom: 16px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -195,42 +187,134 @@
             box-shadow: 0 0 6px var(--accent-radio);
         }
 
+        /* Album Artwork Card */
+        .album-art-wrapper {
+            display: flex;
+            justify-content: center;
+            margin: 10px 0 16px;
+        }
+
+        .album-art-img {
+            width: 170px;
+            height: 170px;
+            border-radius: var(--radius-md);
+            object-fit: cover;
+            background: var(--surface-elevated);
+            border: 1px solid var(--surface-border);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.45);
+            transition: var(--transition);
+        }
+
+        .album-art-img:hover {
+            transform: scale(1.02);
+        }
+
+        /* Current Track Details & Tiny Download Button */
+        .track-metadata-card {
+            background: var(--surface-elevated);
+            border: 1px solid var(--surface-border);
+            border-radius: var(--radius-md);
+            padding: 12px 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            gap: 10px;
+        }
+
+        .track-info-left {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            flex: 1;
+        }
+
+        .track-info-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-main);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .track-info-sub {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-tiny-dl {
+            background: var(--surface);
+            border: 1px solid var(--surface-border);
+            color: var(--text-main);
+            font-size: 0.75rem;
+            padding: 6px 10px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            text-decoration: none;
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+
+        .btn-tiny-dl:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: var(--surface-elevated);
+        }
+
+        /* Custom URL Input Bar */
+        .custom-url-section {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .custom-url-input {
+            flex: 1;
+            padding: 9px 12px;
+            background: var(--surface-elevated);
+            color: var(--text-main);
+            border: 1px solid var(--surface-border);
+            border-radius: var(--radius-sm);
+            font-size: 0.82rem;
+            transition: var(--transition);
+        }
+
+        .custom-url-input:focus {
+            border-color: var(--primary);
+        }
+
+        .btn-custom-load {
+            background: var(--surface-elevated);
+            border: 1px solid var(--surface-border);
+            color: var(--text-main);
+            padding: 0 14px;
+            border-radius: var(--radius-sm);
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+
+        .btn-custom-load:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* Lockable overlay state */
         .lockable.is-locked {
             opacity: 0.35 !important;
             pointer-events: none !important;
             user-select: none !important;
             filter: grayscale(40%);
             cursor: not-allowed !important;
-        }
-
-        /* Search Bar */
-        .search-box-wrapper {
-            position: relative;
-            margin-bottom: 14px;
-        }
-
-        .search-input {
-            width: 100%;
-            padding: 10px 14px 10px 38px;
-            background: var(--surface-elevated);
-            color: var(--text-main);
-            border: 1px solid var(--surface-border);
-            border-radius: var(--radius-md);
-            font-size: 0.85rem;
-            transition: var(--transition);
-        }
-
-        .search-input:focus {
-            border-color: var(--primary);
-        }
-
-        .search-icon-svg {
-            position: absolute;
-            left: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-muted);
-            pointer-events: none;
         }
 
         .form-row {
@@ -283,7 +367,7 @@
         }
 
         .progress-group {
-            margin: 22px 0 16px;
+            margin: 20px 0 16px;
         }
 
         .time-labels {
@@ -332,8 +416,9 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 12px;
+            gap: 10px;
             margin: 18px 0;
+            flex-wrap: wrap;
         }
 
         .btn-ctrl {
@@ -341,14 +426,14 @@
             border: 1px solid var(--surface-border);
             color: var(--text-main);
             height: 42px;
-            padding: 0 14px;
+            padding: 0 12px;
             border-radius: var(--radius-md);
             font-size: 0.85rem;
             font-weight: 500;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 6px;
+            gap: 5px;
             cursor: pointer;
             transition: var(--transition);
         }
@@ -571,13 +656,11 @@
             opacity: 0.8;
         }
 
-        /* --- SYNC CONFIG MODAL --- */
+        /* Modal Overlay */
         .modal-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.7);
             backdrop-filter: blur(4px);
             display: none;
@@ -690,7 +773,6 @@
     <div class="player-card">
         <header class="header">
             <div class="title-group">
-                <img id="currentBookIcon" class="library-icon" src="https://img.icons8.com/?size=48&id=rRRmNzuBSYaF&format=png" alt="Library Icon" onerror="this.style.display='none'">
                 <div class="wave-container" id="equalizer">
                     <span class="wave-bar"></span>
                     <span class="wave-bar"></span>
@@ -711,10 +793,26 @@
 
         <audio id="audioPlayer" preload="auto"></audio>
 
-        <!-- Search Bar -->
-        <div class="search-box-wrapper lockable">
-            <svg class="search-icon-svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-            <input type="text" id="librarySearchInput" class="search-input" placeholder="Search books or chapters...">
+        <!-- Dynamic Cover Image -->
+        <div class="album-art-wrapper lockable">
+            <img id="mainAlbumCover" class="album-art-img" src="https://img.icons8.com/?size=96&id=rRRmNzuBSYaF&format=png" alt="Album Cover">
+        </div>
+
+        <!-- Current Song Metadata & Tiny Download Button -->
+        <div class="track-metadata-card lockable">
+            <div class="track-info-left">
+                <div class="track-info-title" id="metaTrackTitle">No Track Selected</div>
+                <div class="track-info-sub">
+                    <span id="metaCollectionName">Library</span> • <span id="metaTrackSize">-- MB</span>
+                </div>
+            </div>
+            <a href="#" id="trackDownloadBtn" class="btn-tiny-dl" download target="_blank" title="Download Audio File">⬇️ Download</a>
+        </div>
+
+        <!-- Custom Audio Link Bar -->
+        <div class="custom-url-section lockable">
+            <input type="url" id="customAudioInput" class="custom-url-input" placeholder="Paste direct audio URL (.mp3, .m4a)...">
+            <button class="btn-custom-load" id="loadCustomAudioBtn">Play URL</button>
         </div>
 
         <div class="form-row lockable">
@@ -723,7 +821,7 @@
         </div>
 
         <div class="form-row lockable">
-            <label for="chapterSelect">Chapter</label>
+            <label for="chapterSelect">Chapter / Track</label>
             <select id="chapterSelect"></select>
         </div>
 
@@ -736,11 +834,12 @@
         </div>
 
         <div class="player-controls">
-            <button class="btn-ctrl lockable" id="prevChapterBtn" title="Previous Chapter">⏮</button>
+            <button class="btn-ctrl lockable" id="shuffleBtn" title="Shuffle Random Track">🔀</button>
+            <button class="btn-ctrl lockable" id="prevChapterBtn" title="Previous Track">⏮</button>
             <button class="btn-ctrl lockable" id="rewind10Btn" title="Rewind 10s">⏪ 10s</button>
             <button class="btn-ctrl btn-main" id="playPauseBtn" title="Play / Pause">▶</button>
             <button class="btn-ctrl lockable" id="forward10Btn" title="Forward 10s">10s ⏩</button>
-            <button class="btn-ctrl lockable" id="nextChapterBtn" title="Next Chapter">⏭</button>
+            <button class="btn-ctrl lockable" id="nextChapterBtn" title="Next Track">⏭</button>
         </div>
 
         <div class="extra-settings lockable">
@@ -813,7 +912,7 @@
     </div>
 
     <script>
-        // --- STORAGE KEYS & INITIAL VALUES ---
+        // --- STORAGE & CREDENTIALS ---
         const STORAGE_KEY_TOKEN = "shafin_audiobook_token";
         const STORAGE_KEY_GIST = "shafin_audiobook_gist_id";
 
@@ -822,13 +921,13 @@
         const GIST_FILENAME = "audiobook-state.json";
         const AUDIO_CACHE_NAME = 'shafin-audiobook-cache-v1';
 
-        // Published Google Sheets CSV
+        // Published Google Sheet CSV
         const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRYuHCeVk83VDmldZXgvk_9CBRJBeoJt4lqSp8_BAThJEZvItCeTA5nQWVIkh-hu44j4LvLVfFc8Ov7/pub?output=csv";
 
         // Fallback default list
         const DEFAULT_COLLECTIONS = [
-            { id: "MakkahTaraweeh1442", name: "Makkah 1442", group: "Makkah Taraweeh", icon: "https://img.icons8.com/?size=48&id=rRRmNzuBSYaF&format=png" },
-            { id: "MakkahTaraweeh1443", name: "Makkah 1443", group: "Makkah Taraweeh", icon: "https://img.icons8.com/?size=48&id=rRRmNzuBSYaF&format=png" }
+            { id: "MakkahTaraweeh1442", name: "Makkah 1442", group: "Makkah Taraweeh", icon: "https://img.icons8.com/?size=96&id=rRRmNzuBSYaF&format=png" },
+            { id: "MakkahTaraweeh1443", name: "Makkah 1443", group: "Makkah Taraweeh", icon: "https://img.icons8.com/?size=96&id=rRRmNzuBSYaF&format=png" }
         ];
 
         // --- STATE ---
@@ -866,8 +965,14 @@
         const equalizer = document.getElementById('equalizer');
         const lockToggleBtn = document.getElementById('lockToggleBtn');
         const radioToggleBtn = document.getElementById('radioToggleBtn');
-        const librarySearchInput = document.getElementById('librarySearchInput');
-        const currentBookIcon = document.getElementById('currentBookIcon');
+        const mainAlbumCover = document.getElementById('mainAlbumCover');
+        const metaTrackTitle = document.getElementById('metaTrackTitle');
+        const metaCollectionName = document.getElementById('metaCollectionName');
+        const metaTrackSize = document.getElementById('metaTrackSize');
+        const trackDownloadBtn = document.getElementById('trackDownloadBtn');
+        const customAudioInput = document.getElementById('customAudioInput');
+        const loadCustomAudioBtn = document.getElementById('loadCustomAudioBtn');
+        const shuffleBtn = document.getElementById('shuffleBtn');
 
         // Modal Elements
         const syncModal = document.getElementById('syncModal');
@@ -900,8 +1005,14 @@
             return div.innerHTML;
         }
 
-        function formatChapterName(filename) {
+        // Clean & Extract readable chapter/song name from Archive metadata & filename
+        function formatChapterName(filename, metaTitle) {
+            if (metaTitle && typeof metaTitle === 'string' && metaTitle.trim().length > 0) {
+                return metaTitle.trim();
+            }
             let name = decodeURIComponent(filename);
+            name = name.replace(/\.[^/.]+$/, "");
+            name = name.replace(/^(\d+[\s._-]+|track[\s._-]*\d+[\s._-]*)/i, "");
             name = name.replace(/[_\-.]+/g, ' ').trim();
             name = name.replace(/\s+/g, ' ');
             return name;
@@ -945,7 +1056,7 @@
             return result;
         }
 
-        // --- SYNC MODAL HANDLING ---
+        // --- MODAL SETTINGS ---
         openSyncModalBtn.addEventListener('click', () => {
             inputGithubToken.value = GITHUB_TOKEN;
             inputGistId.value = GIST_ID;
@@ -954,9 +1065,7 @@
             syncModal.classList.add('active');
         });
 
-        closeSyncModalBtn.addEventListener('click', () => {
-            syncModal.classList.remove('active');
-        });
+        closeSyncModalBtn.addEventListener('click', () => syncModal.classList.remove('active'));
 
         clearSyncCredsBtn.addEventListener('click', () => {
             localStorage.removeItem(STORAGE_KEY_TOKEN);
@@ -972,8 +1081,7 @@
 
         saveSyncCredsBtn.addEventListener('click', async () => {
             const testToken = inputGithubToken.value.trim();
-            const rawGist = inputGistId.value.trim();
-            const testGistId = getCleanGistId(rawGist);
+            const testGistId = getCleanGistId(inputGistId.value.trim());
 
             if (!testToken || !testGistId) {
                 modalStatusText.textContent = "Both Token and Gist ID are required.";
@@ -992,31 +1100,27 @@
                     }
                 });
 
-                if (!res.ok) {
-                    throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-                }
+                if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
 
-                // If valid, save to storage & memory
                 GITHUB_TOKEN = testToken;
                 GIST_ID = testGistId;
                 localStorage.setItem(STORAGE_KEY_TOKEN, GITHUB_TOKEN);
                 localStorage.setItem(STORAGE_KEY_GIST, GIST_ID);
 
-                modalStatusText.textContent = "Connection successful! Saved.";
+                modalStatusText.textContent = "Connected and saved!";
                 modalStatusText.style.color = "var(--accent-radio)";
 
                 setTimeout(() => {
                     syncModal.classList.remove('active');
                     applyCloudState();
                 }, 1000);
-
             } catch (err) {
                 modalStatusText.textContent = `Verification failed: ${err.message}`;
                 modalStatusText.style.color = "var(--danger)";
             }
         });
 
-        // --- CSV COLLECTION LOADER ---
+        // --- GOOGLE SHEETS CSV LOADER ---
         async function loadCollectionsFromSheet() {
             try {
                 const response = await fetch(SHEET_CSV_URL);
@@ -1049,12 +1153,9 @@
                         });
                     }
                 }
-
-                if (parsed.length > 0) {
-                    COLLECTIONS = parsed;
-                }
+                if (parsed.length > 0) COLLECTIONS = parsed;
             } catch (err) {
-                console.warn("Failed loading collections from CSV, using defaults:", err);
+                console.warn("Failed loading collections from CSV:", err);
             }
         }
 
@@ -1072,7 +1173,7 @@
                     if (response.ok) cache.put(url, response.clone());
                 }).catch(() => {});
             } catch (err) {
-                console.warn("Cache access error:", err);
+                console.warn("Cache access warning:", err);
             }
             return url;
         }
@@ -1112,32 +1213,33 @@
 
         lockToggleBtn.addEventListener('click', toggleControlsLock);
 
-        // --- FETCH CHAPTERS ---
+        // --- FETCH CHAPTERS & PARSE TITLES ---
         async function fetchChapterList(identifier) {
             statusDiv.textContent = "Loading chapters from Archive.org...";
             try {
                 const response = await fetch(`https://archive.org/metadata/${identifier}`);
                 if (!response.ok) throw new Error("Failed to fetch metadata");
                 const data = await response.json();
-                const files = (data.files || []).filter(f => f.name.match(/\.(mp3|ogg|m4a|aac)$/i));
+                const files = (data.files || []).filter(f => f.name && f.name.match(/\.(mp3|ogg|m4a|aac)$/i));
                 files.sort(naturalSort);
 
                 return files.map((f, idx) => {
                     const rawName = f.name;
-                    const stripped = rawName.replace(/\.[^/.]+$/, "");
-                    const formatted = formatChapterName(rawName);
+                    const metaTitle = f.title || "";
+                    const cleanName = formatChapterName(rawName, metaTitle);
 
-                    let displayName;
-                    const isNumericOnly = /^\d+$/.test(stripped.replace(/[_\-\s]/g, ''));
-                    if (stripped.length < 4 || isNumericOnly) {
-                        displayName = `#${idx + 1} — ${formatted}`;
-                    } else {
-                        displayName = formatted;
-                    }
+                    const isNumericOnly = /^\d+$/.test(cleanName.replace(/\s+/g, ''));
+                    const displayName = (!cleanName || isNumericOnly) 
+                        ? `#${idx + 1} — ${rawName.replace(/\.[^/.]+$/, "")}`
+                        : cleanName;
+
+                    const sizeMb = f.size ? (parseInt(f.size) / (1024 * 1024)).toFixed(1) + " MB" : "Audio Track";
 
                     return {
                         name: displayName,
                         fullName: rawName,
+                        size: sizeMb,
+                        format: (f.format || 'MP3').toUpperCase(),
                         url: `https://archive.org/download/${identifier}/${encodeURIComponent(rawName)}`
                     };
                 });
@@ -1148,10 +1250,9 @@
             }
         }
 
-        // --- UI POPULATION WITH GROUPING ---
+        // --- UI POPULATION ---
         function populateCollectionSelect() {
             collectionSelect.innerHTML = '';
-
             const groups = {};
             COLLECTIONS.forEach(item => {
                 const grp = item.group || 'Audiobooks';
@@ -1170,17 +1271,30 @@
                 });
                 collectionSelect.appendChild(optGroup);
             });
-
-            updateHeaderIcon();
         }
 
-        function updateHeaderIcon() {
-            const currentItem = COLLECTIONS.find(c => c.id === currentCollectionId);
-            if (currentItem && currentItem.icon) {
-                currentBookIcon.src = currentItem.icon;
-                currentBookIcon.style.display = 'block';
-            } else {
-                currentBookIcon.style.display = 'none';
+        function updateAlbumCover(identifier, sheetIcon) {
+            let coverUrl = sheetIcon || `https://archive.org/services/img/${identifier}`;
+            mainAlbumCover.src = coverUrl;
+            mainAlbumCover.onerror = () => {
+                if (mainAlbumCover.src !== `https://archive.org/services/img/${identifier}`) {
+                    mainAlbumCover.src = `https://archive.org/services/img/${identifier}`;
+                }
+            };
+
+            if ('mediaSession' in navigator) {
+                const curCol = COLLECTIONS.find(c => c.id === currentCollectionId);
+                const curChapter = currentChapters[chapterSelect.value];
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    title: curChapter ? curChapter.name : "Shafin's AudioBook",
+                    artist: curCol ? curCol.name : "Archive Audio",
+                    album: curCol ? (curCol.group || "Audiobooks") : "",
+                    artwork: [
+                        { src: coverUrl, sizes: '96x96', type: 'image/jpeg' },
+                        { src: coverUrl, sizes: '256x256', type: 'image/jpeg' },
+                        { src: coverUrl, sizes: '512x512', type: 'image/jpeg' }
+                    ]
+                });
             }
         }
 
@@ -1195,38 +1309,22 @@
             });
         }
 
-        // --- SEARCH FUNCTIONALITY ---
-        librarySearchInput.addEventListener('input', (e) => {
-            const query = e.target.value.toLowerCase().trim();
-            if (!query) {
-                populateCollectionSelect();
-                collectionSelect.value = currentCollectionId;
-                populateChapterSelect(currentChapters);
-                chapterSelect.value = audio.src ? chapterSelect.value : 0;
+        function updateTrackMetadataDisplay(chapter) {
+            if (!chapter) {
+                metaTrackTitle.textContent = "No Track Selected";
+                metaTrackSize.textContent = "-- MB";
+                trackDownloadBtn.style.display = "none";
                 return;
             }
+            metaTrackTitle.textContent = chapter.name;
+            const curCol = COLLECTIONS.find(c => c.id === currentCollectionId);
+            metaCollectionName.textContent = curCol ? curCol.name : "Custom Stream";
+            metaTrackSize.textContent = `${chapter.format || 'MP3'} • ${chapter.size || ''}`;
 
-            const matchingCollections = COLLECTIONS.filter(c => 
-                c.name.toLowerCase().includes(query) || 
-                (c.group && c.group.toLowerCase().includes(query))
-            );
-
-            const matchingChapters = currentChapters
-                .map((ch, idx) => ({ ...ch, originalIndex: idx }))
-                .filter(ch => ch.name.toLowerCase().includes(query));
-
-            if (matchingCollections.length > 0 && !matchingCollections.some(c => c.id === collectionSelect.value)) {
-                collectionSelect.innerHTML = matchingCollections.map(c => 
-                    `<option value="${c.id}">${c.name} (${c.group || 'General'})</option>`
-                ).join('');
-            }
-
-            if (matchingChapters.length > 0) {
-                chapterSelect.innerHTML = matchingChapters.map(ch => 
-                    `<option value="${ch.originalIndex}">${ch.name}</option>`
-                ).join('');
-            }
-        });
+            trackDownloadBtn.href = chapter.url;
+            trackDownloadBtn.setAttribute('download', chapter.fullName || `${chapter.name}.mp3`);
+            trackDownloadBtn.style.display = "inline-flex";
+        }
 
         async function loadChapter(index, autoPlay = false, seekOffset = null) {
             if (!currentChapters[index]) return;
@@ -1238,6 +1336,8 @@
             audio.load();
             chapterSelect.value = index;
             isApplyingCloudState = false;
+
+            updateTrackMetadataDisplay(chapter);
 
             if (seekOffset !== null) {
                 const applyOffset = () => {
@@ -1256,7 +1356,39 @@
             prefetchAdjacentChapters(index);
         }
 
-        // --- RADIO MODE ---
+        // --- SHUFFLE BUTTON ---
+        shuffleBtn.addEventListener('click', () => {
+            if (currentChapters.length === 0) return;
+            const randomIdx = Math.floor(Math.random() * currentChapters.length);
+            loadChapter(randomIdx, true);
+            statusDiv.textContent = `🔀 Shuffled: ${currentChapters[randomIdx].name}`;
+        });
+
+        // --- MANUAL AUDIO URL LOADER ---
+        loadCustomAudioBtn.addEventListener('click', () => {
+            const customUrl = customAudioInput.value.trim();
+            if (!customUrl) return;
+
+            const cleanFileName = customUrl.split('/').pop().split('?')[0] || "Custom Track";
+            const customChapter = {
+                name: decodeURIComponent(cleanFileName),
+                fullName: cleanFileName,
+                size: "Custom Link",
+                format: "AUDIO",
+                url: customUrl
+            };
+
+            currentChapters = [customChapter];
+            populateChapterSelect(currentChapters);
+            currentCollectionId = "custom";
+            metaCollectionName.textContent = "Custom Stream";
+            mainAlbumCover.src = "https://img.icons8.com/?size=96&id=rRRmNzuBSYaF&format=png";
+
+            loadChapter(0, true);
+            statusDiv.textContent = `Loaded custom audio link.`;
+        });
+
+        // --- RADIO MODE (5-MIN ROTATION) ---
         function toggleRadioMode() {
             isRadioMode = !isRadioMode;
             radioToggleBtn.classList.toggle('active', isRadioMode);
@@ -1280,7 +1412,7 @@
             if (randomColl.id !== currentCollectionId) {
                 collectionSelect.value = randomColl.id;
                 currentCollectionId = randomColl.id;
-                updateHeaderIcon();
+                updateAlbumCover(randomColl.id, randomColl.icon);
                 currentChapters = await fetchChapterList(randomColl.id);
                 populateChapterSelect(currentChapters);
             }
@@ -1292,6 +1424,7 @@
 
             const targetChapter = currentChapters[randomChapterIdx];
             statusDiv.textContent = `📻 Radio: ${targetChapter.name}`;
+            updateTrackMetadataDisplay(targetChapter);
 
             const playUrl = await fetchWithCache(targetChapter.url);
             audio.src = playUrl;
@@ -1680,7 +1813,7 @@
                     if (collection) {
                         collectionSelect.value = collection.id;
                         currentCollectionId = collection.id;
-                        updateHeaderIcon();
+                        updateAlbumCover(collection.id, collection.icon);
                         currentChapters = await fetchChapterList(collection.id);
                         populateChapterSelect(currentChapters);
 
@@ -1708,7 +1841,9 @@
 
         async function switchCollection(id) {
             currentCollectionId = id;
-            updateHeaderIcon();
+            const currentItem = COLLECTIONS.find(c => c.id === id);
+            updateAlbumCover(id, currentItem ? currentItem.icon : null);
+
             currentChapters = await fetchChapterList(id);
             populateChapterSelect(currentChapters);
             if (currentChapters.length > 0) {
@@ -1716,6 +1851,7 @@
                 statusDiv.textContent = `Loaded ${currentChapters.length} chapters.`;
             } else {
                 statusDiv.textContent = "No audio files found.";
+                updateTrackMetadataDisplay(null);
             }
         }
 
