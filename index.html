@@ -6,54 +6,57 @@
     <title>Shafin's AudioBook</title>
     <!-- Embedded Audio Book Favicon -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎧</text></svg>">
+    <!-- jsmediatags for extracting embedded ID3 cover art -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsmediatags/3.9.5/jsmediatags.min.js"></script>
     <style>
         :root {
-            --bg: #0b0d11;
-            --surface: #14171f;
-            --surface-elevated: #1e222d;
-            --surface-border: #2a303f;
-            --primary: #9d72ff;
-            --primary-hover: #b08dff;
-            --primary-glow: rgba(157, 114, 255, 0.25);
-            --text-main: #f3f4f6;
-            --text-muted: #94a3b8;
-            --danger: #f87171;
-            --danger-bg: rgba(248, 113, 113, 0.1);
-            --accent-radio: #10b981;
-            --accent-radio-glow: rgba(16, 185, 129, 0.25);
-            --radius-sm: 8px;
-            --radius-md: 12px;
-            --radius-lg: 20px;
-            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            --bg: #000000;
+            --surface: #121212;
+            --surface-elevated: #181818;
+            --surface-highlight: #282828;
+            --surface-border: #242424;
+            --primary: #1ed760;
+            --primary-hover: #3be477;
+            --primary-glow: rgba(30, 215, 96, 0.3);
+            --text-main: #ffffff;
+            --text-muted: #b3b3b3;
+            --text-subtle: #6a6a6a;
+            --danger: #e91429;
+            --danger-bg: rgba(233, 20, 41, 0.12);
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 18px;
+            --transition: all 0.2s cubic-bezier(0.3, 0, 0, 1);
         }
 
         body.light-theme {
-            --bg: #f8fafc;
+            --bg: #f4f4f4;
             --surface: #ffffff;
-            --surface-elevated: #f1f5f9;
-            --surface-border: #e2e8f0;
-            --primary: #7c3aed;
-            --primary-hover: #6d28d9;
-            --primary-glow: rgba(124, 58, 237, 0.18);
-            --text-main: #0f172a;
-            --text-muted: #64748b;
-            --danger: #ef4444;
-            --danger-bg: rgba(239, 68, 68, 0.08);
-            --accent-radio: #059669;
-            --accent-radio-glow: rgba(5, 150, 105, 0.2);
+            --surface-elevated: #f0f0f0;
+            --surface-highlight: #e6e6e6;
+            --surface-border: #e0e0e0;
+            --primary: #1db954;
+            --primary-hover: #1aa34a;
+            --primary-glow: rgba(29, 185, 84, 0.2);
+            --text-main: #121212;
+            --text-muted: #656565;
+            --text-subtle: #9a9a9a;
+            --danger: #e91429;
+            --danger-bg: rgba(233, 20, 41, 0.08);
         }
 
         * {
             box-sizing: border-box;
             outline: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", sans-serif;
+            font-family: "Circular", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
             background-color: var(--bg);
             color: var(--text-main);
             margin: 0;
-            padding: 32px 16px;
+            padding: 24px 16px;
             display: flex;
             justify-content: center;
             align-items: flex-start;
@@ -63,39 +66,34 @@
 
         .player-card {
             width: 100%;
-            max-width: 600px;
+            max-width: 540px;
             background: var(--surface);
             border: 1px solid var(--surface-border);
             border-radius: var(--radius-lg);
-            padding: 28px;
-            box-shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.45);
-            animation: cardAppear 0.4s ease-out forwards;
+            padding: 24px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
             position: relative;
         }
 
-        @keyframes cardAppear {
-            from { opacity: 0; transform: translateY(12px) scale(0.99); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-
+        /* Header */
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
         }
 
         .title-group {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
         }
 
         .title-group h1 {
-            font-size: 1.25rem;
-            font-weight: 600;
+            font-size: 1.15rem;
+            font-weight: 700;
             margin: 0;
-            letter-spacing: -0.02em;
+            letter-spacing: -0.03em;
         }
 
         .header-actions {
@@ -104,54 +102,52 @@
             gap: 8px;
         }
 
+        /* Equalizer Animation */
         .wave-container {
             display: flex;
             align-items: flex-end;
-            gap: 3px;
-            height: 18px;
+            gap: 2.5px;
+            height: 16px;
         }
 
         .wave-bar {
             width: 3px;
             background: var(--primary);
             border-radius: 2px;
-            height: 4px;
-            transition: height 0.2s ease, background-color 0.3s ease;
+            height: 3px;
+            transition: height 0.2s ease;
         }
 
-        .radio-active .wave-bar {
-            background: var(--accent-radio);
-        }
-
-        .playing .wave-bar:nth-child(1) { animation: wave 1s ease-in-out infinite 0.1s; }
-        .playing .wave-bar:nth-child(2) { animation: wave 1s ease-in-out infinite 0.3s; }
-        .playing .wave-bar:nth-child(3) { animation: wave 1s ease-in-out infinite 0.2s; }
-        .playing .wave-bar:nth-child(4) { animation: wave 1s ease-in-out infinite 0.4s; }
+        .playing .wave-bar:nth-child(1) { animation: wave 0.8s ease-in-out infinite 0.1s; }
+        .playing .wave-bar:nth-child(2) { animation: wave 0.8s ease-in-out infinite 0.3s; }
+        .playing .wave-bar:nth-child(3) { animation: wave 0.8s ease-in-out infinite 0.2s; }
+        .playing .wave-bar:nth-child(4) { animation: wave 0.8s ease-in-out infinite 0.4s; }
 
         @keyframes wave {
-            0%, 100% { height: 4px; }
-            50% { height: 18px; }
+            0%, 100% { height: 3px; }
+            50% { height: 16px; }
         }
 
         .action-circle-btn {
             background: var(--surface-elevated);
             border: 1px solid var(--surface-border);
             color: var(--text-main);
-            width: 36px;
-            height: 36px;
+            width: 34px;
+            height: 34px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             text-decoration: none;
             cursor: pointer;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             transition: var(--transition);
         }
 
         .action-circle-btn:hover {
+            background: var(--surface-highlight);
+            transform: scale(1.06);
             border-color: var(--primary);
-            transform: scale(1.05);
         }
 
         .action-circle-btn.locked {
@@ -160,10 +156,18 @@
             color: var(--danger);
         }
 
-        .status {
-            font-size: 0.82rem;
-            color: var(--text-muted);
+        /* Status & Quick Bar */
+        .status-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 16px;
+            gap: 10px;
+        }
+
+        .status {
+            font-size: 0.78rem;
+            color: var(--text-muted);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -179,47 +183,67 @@
             border-radius: 50%;
             background: var(--primary);
             display: inline-block;
-            transition: background 0.3s;
+            box-shadow: 0 0 8px var(--primary);
         }
 
-        .status.radio-mode::before {
-            background: var(--accent-radio);
-            box-shadow: 0 0 6px var(--accent-radio);
+        .btn-resume-last {
+            background: var(--primary);
+            color: #000000;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 50px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: var(--transition);
+            white-space: nowrap;
+            box-shadow: 0 4px 12px var(--primary-glow);
+        }
+
+        .btn-resume-last:hover {
+            background: var(--primary-hover);
+            transform: scale(1.04);
+        }
+
+        .btn-resume-last:active {
+            transform: scale(0.98);
         }
 
         /* Album Artwork Card */
         .album-art-wrapper {
             display: flex;
             justify-content: center;
-            margin: 10px 0 16px;
+            margin: 6px 0 16px;
+            position: relative;
         }
 
         .album-art-img {
-            width: 170px;
-            height: 170px;
+            width: 200px;
+            height: 200px;
             border-radius: var(--radius-md);
             object-fit: cover;
             background: var(--surface-elevated);
-            border: 1px solid var(--surface-border);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.45);
-            transition: var(--transition);
+            box-shadow: 0 14px 35px rgba(0, 0, 0, 0.7);
+            transition: transform 0.3s ease;
         }
 
         .album-art-img:hover {
             transform: scale(1.02);
         }
 
-        /* Current Track Details & Tiny Download Button */
+        /* Current Track Details & Download */
         .track-metadata-card {
             background: var(--surface-elevated);
-            border: 1px solid var(--surface-border);
             border-radius: var(--radius-md);
             padding: 12px 14px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 16px;
-            gap: 10px;
+            margin-bottom: 14px;
+            gap: 12px;
         }
 
         .track-info-left {
@@ -230,64 +254,64 @@
         }
 
         .track-info-title {
-            font-size: 0.9rem;
-            font-weight: 600;
+            font-size: 0.95rem;
+            font-weight: 700;
             color: var(--text-main);
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+            letter-spacing: -0.01em;
         }
 
         .track-info-sub {
             font-size: 0.75rem;
             color: var(--text-muted);
-            margin-top: 2px;
-            display: flex;
-            gap: 8px;
+            margin-top: 3px;
         }
 
         .btn-tiny-dl {
-            background: var(--surface);
-            border: 1px solid var(--surface-border);
+            background: var(--surface-highlight);
             color: var(--text-main);
-            font-size: 0.75rem;
-            padding: 6px 10px;
-            border-radius: var(--radius-sm);
+            font-size: 0.72rem;
+            font-weight: 600;
+            padding: 6px 12px;
+            border-radius: 50px;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
             gap: 4px;
             text-decoration: none;
             transition: var(--transition);
-            white-space: nowrap;
+            border: 1px solid transparent;
         }
 
         .btn-tiny-dl:hover {
-            border-color: var(--primary);
             color: var(--primary);
-            background: var(--surface-elevated);
+            border-color: var(--primary);
+            transform: scale(1.03);
         }
 
         /* Custom URL Input Bar */
         .custom-url-section {
             display: flex;
             gap: 8px;
-            margin-bottom: 16px;
+            margin-bottom: 14px;
         }
 
         .custom-url-input {
             flex: 1;
-            padding: 9px 12px;
+            padding: 8px 12px;
             background: var(--surface-elevated);
             color: var(--text-main);
             border: 1px solid var(--surface-border);
             border-radius: var(--radius-sm);
-            font-size: 0.82rem;
+            font-size: 0.8rem;
             transition: var(--transition);
         }
 
         .custom-url-input:focus {
             border-color: var(--primary);
+            background: var(--surface-highlight);
         }
 
         .btn-custom-load {
@@ -296,19 +320,19 @@
             color: var(--text-main);
             padding: 0 14px;
             border-radius: var(--radius-sm);
-            font-size: 0.8rem;
-            font-weight: 500;
+            font-size: 0.78rem;
+            font-weight: 600;
             cursor: pointer;
             transition: var(--transition);
-            white-space: nowrap;
         }
 
         .btn-custom-load:hover {
-            border-color: var(--primary);
+            background: var(--surface-highlight);
             color: var(--primary);
+            border-color: var(--primary);
         }
 
-        /* Lockable overlay state */
+        /* Lock state */
         .lockable.is-locked {
             opacity: 0.35 !important;
             pointer-events: none !important;
@@ -320,16 +344,16 @@
         .form-row {
             display: flex;
             flex-direction: column;
-            gap: 6px;
-            margin-bottom: 14px;
+            gap: 5px;
+            margin-bottom: 12px;
         }
 
         label {
-            font-size: 0.72rem;
+            font-size: 0.7rem;
             text-transform: uppercase;
             font-weight: 700;
-            letter-spacing: 0.05em;
-            color: var(--text-muted);
+            letter-spacing: 0.08em;
+            color: var(--text-subtle);
         }
 
         select {
@@ -339,41 +363,42 @@
             color: var(--text-main);
             border: 1px solid var(--surface-border);
             border-radius: var(--radius-md);
-            font-size: 0.9rem;
+            font-size: 0.86rem;
             transition: var(--transition);
             cursor: pointer;
             appearance: none;
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%2394a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>');
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%23b3b3b3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>');
             background-repeat: no-repeat;
             background-position: right 14px center;
             padding-right: 36px;
         }
 
+        select:focus, select:hover {
+            border-color: var(--primary);
+            background-color: var(--surface-highlight);
+        }
+
         select optgroup {
             background: var(--surface);
             color: var(--primary);
-            font-weight: 600;
-            padding: 4px;
+            font-weight: 700;
         }
 
         select option {
             background: var(--surface-elevated);
             color: var(--text-main);
-            font-weight: normal;
         }
 
-        select:focus, select:hover {
-            border-color: var(--primary);
-        }
-
+        /* Progress Bar */
         .progress-group {
-            margin: 20px 0 16px;
+            margin: 18px 0 14px;
         }
 
         .time-labels {
             display: flex;
             justify-content: space-between;
-            font-size: 0.78rem;
+            font-size: 0.72rem;
+            font-weight: 500;
             font-variant-numeric: tabular-nums;
             color: var(--text-muted);
             margin-bottom: 6px;
@@ -387,93 +412,90 @@
         }
 
         input[type="range"]::-webkit-slider-runnable-track {
-            height: 5px;
-            background: var(--surface-elevated);
+            height: 4px;
+            background: var(--surface-highlight);
             border-radius: 99px;
             transition: var(--transition);
         }
 
         input[type="range"]:hover::-webkit-slider-runnable-track {
-            background: var(--surface-border);
+            background: #4d4d4d;
         }
 
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
-            height: 14px;
-            width: 14px;
+            height: 12px;
+            width: 12px;
             border-radius: 50%;
+            background: var(--text-main);
+            margin-top: -4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+            transition: transform 0.15s ease, background 0.15s ease;
+        }
+
+        input[type="range"]:hover::-webkit-slider-thumb {
             background: var(--primary);
-            margin-top: -4.5px;
-            box-shadow: 0 0 10px var(--primary-glow);
-            transition: transform 0.15s ease, box-shadow 0.15s ease;
+            transform: scale(1.2);
         }
 
-        input[type="range"]:active::-webkit-slider-thumb {
-            transform: scale(1.25);
-        }
-
+        /* Player Controls */
         .player-controls {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
-            margin: 18px 0;
-            flex-wrap: wrap;
+            gap: 12px;
+            margin: 16px 0;
         }
 
         .btn-ctrl {
-            background: var(--surface-elevated);
-            border: 1px solid var(--surface-border);
-            color: var(--text-main);
-            height: 42px;
-            padding: 0 12px;
-            border-radius: var(--radius-md);
-            font-size: 0.85rem;
-            font-weight: 500;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            height: 38px;
+            padding: 0 10px;
+            border-radius: 50%;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: var(--transition);
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 5px;
-            cursor: pointer;
-            transition: var(--transition);
         }
 
         .btn-ctrl:hover {
-            border-color: var(--primary);
-            background: var(--surface);
-            transform: translateY(-1px);
+            color: var(--text-main);
+            transform: scale(1.1);
         }
 
         .btn-ctrl:active {
-            transform: translateY(0);
+            transform: scale(0.95);
         }
 
         .btn-ctrl.btn-main {
-            width: 54px;
-            height: 54px;
+            width: 52px;
+            height: 52px;
             border-radius: 50%;
-            padding: 0;
             background: var(--primary);
-            color: #ffffff;
-            border: none;
-            box-shadow: 0 6px 16px var(--primary-glow);
-            font-size: 1.1rem;
+            color: #000000;
+            font-size: 1.25rem;
+            box-shadow: 0 6px 18px var(--primary-glow);
         }
 
         .btn-ctrl.btn-main:hover {
             background: var(--primary-hover);
-            transform: scale(1.05);
+            transform: scale(1.06);
         }
 
+        /* Volume & Speed */
         .extra-settings {
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 12px;
-            padding: 12px 14px;
+            padding: 10px 14px;
             background: var(--surface-elevated);
             border-radius: var(--radius-md);
-            margin: 16px 0;
+            margin: 14px 0;
         }
 
         .speed-dock {
@@ -484,9 +506,10 @@
 
         .speed-dock select {
             width: auto;
-            padding: 4px 28px 4px 10px;
-            font-size: 0.8rem;
-            background-position: right 8px center;
+            padding: 4px 24px 4px 10px;
+            font-size: 0.78rem;
+            background-position: right 6px center;
+            border-radius: var(--radius-sm);
         }
 
         .volume-dock {
@@ -494,32 +517,34 @@
             align-items: center;
             gap: 8px;
             flex: 1;
-            max-width: 170px;
+            max-width: 160px;
         }
 
         .volume-label {
-            font-size: 0.78rem;
+            font-size: 0.74rem;
             color: var(--text-muted);
-            min-width: 32px;
+            min-width: 30px;
             text-align: right;
             font-variant-numeric: tabular-nums;
         }
 
+        /* Mode & Actions */
         .secondary-actions {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 18px;
             gap: 10px;
         }
 
         .btn-secondary {
-            background: transparent;
-            border: 1px dashed var(--surface-border);
+            background: var(--surface-elevated);
+            border: 1px solid var(--surface-border);
             color: var(--text-muted);
             padding: 8px 14px;
-            border-radius: var(--radius-sm);
-            font-size: 0.8rem;
+            border-radius: 50px;
+            font-size: 0.78rem;
+            font-weight: 600;
             cursor: pointer;
             transition: var(--transition);
             display: inline-flex;
@@ -528,38 +553,31 @@
         }
 
         .btn-secondary:hover {
-            color: var(--primary);
-            border-color: var(--primary);
-            background: var(--surface-elevated);
-        }
-
-        .btn-radio {
-            border: 1px solid var(--surface-border);
-            background: var(--surface-elevated);
             color: var(--text-main);
+            border-color: var(--text-muted);
         }
 
         .btn-radio.active {
-            background: var(--accent-radio-glow);
-            border-color: var(--accent-radio);
-            color: var(--accent-radio);
-            font-weight: 600;
+            background: var(--primary-glow);
+            border-color: var(--primary);
+            color: var(--primary);
         }
 
+        /* Tabs */
         .tabs-nav {
             display: flex;
             border-bottom: 1px solid var(--surface-border);
-            gap: 16px;
-            margin-bottom: 12px;
+            gap: 20px;
+            margin-bottom: 10px;
         }
 
         .tab-btn {
             background: transparent;
             border: none;
-            color: var(--text-muted);
-            padding: 8px 4px 12px;
-            font-size: 0.88rem;
-            font-weight: 500;
+            color: var(--text-subtle);
+            padding: 8px 0 10px;
+            font-size: 0.85rem;
+            font-weight: 700;
             cursor: pointer;
             position: relative;
             transition: var(--transition);
@@ -581,12 +599,11 @@
             width: 100%;
             height: 2px;
             background: var(--primary);
-            border-radius: 2px;
         }
 
         .tab-panel {
             display: none;
-            max-height: 220px;
+            max-height: 200px;
             overflow-y: auto;
             scrollbar-width: thin;
         }
@@ -599,12 +616,11 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 12px;
+            padding: 8px 10px;
             border-radius: var(--radius-sm);
-            font-size: 0.85rem;
+            font-size: 0.82rem;
             cursor: pointer;
             transition: var(--transition);
-            margin-bottom: 4px;
         }
 
         .list-item:hover {
@@ -612,12 +628,12 @@
         }
 
         .list-item .item-title {
-            font-weight: 500;
+            font-weight: 600;
             color: var(--text-main);
         }
 
         .list-item .item-subtitle {
-            font-size: 0.75rem;
+            font-size: 0.72rem;
             color: var(--text-muted);
             margin-top: 2px;
         }
@@ -625,9 +641,9 @@
         .delete-btn {
             background: transparent;
             border: none;
-            color: var(--text-muted);
-            width: 28px;
-            height: 28px;
+            color: var(--text-subtle);
+            width: 26px;
+            height: 26px;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -643,26 +659,25 @@
 
         .empty-placeholder {
             text-align: center;
-            color: var(--text-muted);
-            padding: 24px 0;
-            font-size: 0.85rem;
+            color: var(--text-subtle);
+            padding: 20px 0;
+            font-size: 0.8rem;
         }
 
         .footer-info {
             text-align: center;
-            font-size: 0.72rem;
-            color: var(--text-muted);
-            margin-top: 20px;
-            opacity: 0.8;
+            font-size: 0.7rem;
+            color: var(--text-subtle);
+            margin-top: 16px;
         }
 
-        /* Modal Overlay */
+        /* Modal */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0;
             width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(4px);
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(6px);
             display: none;
             justify-content: center;
             align-items: center;
@@ -678,24 +693,23 @@
             background: var(--surface);
             border: 1px solid var(--surface-border);
             border-radius: var(--radius-lg);
-            padding: 24px;
+            padding: 22px;
             width: 100%;
-            max-width: 440px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
-            animation: cardAppear 0.25s ease-out forwards;
+            max-width: 420px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9);
         }
 
         .modal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 16px;
+            margin-bottom: 14px;
         }
 
         .modal-header h2 {
-            font-size: 1.1rem;
+            font-size: 1.05rem;
             margin: 0;
-            font-weight: 600;
+            font-weight: 700;
         }
 
         .modal-close-btn {
@@ -714,12 +728,12 @@
 
         .modal-input {
             width: 100%;
-            padding: 10px 12px;
+            padding: 9px 12px;
             background: var(--surface-elevated);
             color: var(--text-main);
             border: 1px solid var(--surface-border);
             border-radius: var(--radius-sm);
-            font-size: 0.85rem;
+            font-size: 0.82rem;
         }
 
         .modal-input:focus {
@@ -735,12 +749,12 @@
 
         .btn-modal-save {
             background: var(--primary);
-            color: #fff;
+            color: #000000;
             border: none;
             padding: 8px 16px;
-            border-radius: var(--radius-sm);
-            font-weight: 500;
-            font-size: 0.85rem;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 0.82rem;
             cursor: pointer;
             transition: var(--transition);
         }
@@ -753,15 +767,15 @@
             background: transparent;
             color: var(--danger);
             border: 1px solid var(--surface-border);
-            padding: 8px 12px;
-            border-radius: var(--radius-sm);
-            font-size: 0.85rem;
+            padding: 8px 14px;
+            border-radius: 50px;
+            font-size: 0.8rem;
             cursor: pointer;
         }
 
         .modal-status {
-            font-size: 0.78rem;
-            margin-top: 8px;
+            font-size: 0.75rem;
+            margin-top: 6px;
             color: var(--text-muted);
             min-height: 1.2em;
         }
@@ -789,16 +803,19 @@
             </div>
         </header>
 
-        <div class="status" id="status">Connecting to sync service...</div>
+        <div class="status-row">
+            <div class="status" id="status">Connecting to sync service...</div>
+            <button class="btn-resume-last lockable" id="resumeLastBtn" title="Play from last played track & position">▶ Last Played</button>
+        </div>
 
-        <audio id="audioPlayer" preload="auto"></audio>
+        <audio id="audioPlayer" preload="auto" crossorigin="anonymous"></audio>
 
         <!-- Dynamic Cover Image -->
         <div class="album-art-wrapper lockable">
             <img id="mainAlbumCover" class="album-art-img" src="https://img.icons8.com/?size=96&id=rRRmNzuBSYaF&format=png" alt="Album Cover">
         </div>
 
-        <!-- Current Song Metadata & Tiny Download Button -->
+        <!-- Current Song Metadata & Download -->
         <div class="track-metadata-card lockable">
             <div class="track-info-left">
                 <div class="track-info-title" id="metaTrackTitle">No Track Selected</div>
@@ -860,7 +877,7 @@
                 </select>
             </div>
             <div class="volume-dock">
-                <span style="font-size: 0.85rem;">🔊</span>
+                <span style="font-size: 0.8rem;">🔊</span>
                 <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="1">
                 <span class="volume-label" id="volumeLabel">100%</span>
             </div>
@@ -941,6 +958,7 @@
         let isApplyingCloudState = false;
         let syncDebounceTimer = null;
         let isLocked = false;
+        let currentObjectUrl = null;
 
         // Radio State
         let isRadioMode = false;
@@ -973,6 +991,7 @@
         const customAudioInput = document.getElementById('customAudioInput');
         const loadCustomAudioBtn = document.getElementById('loadCustomAudioBtn');
         const shuffleBtn = document.getElementById('shuffleBtn');
+        const resumeLastBtn = document.getElementById('resumeLastBtn');
 
         // Modal Elements
         const syncModal = document.getElementById('syncModal');
@@ -1005,7 +1024,6 @@
             return div.innerHTML;
         }
 
-        // Clean & Extract readable chapter/song name from Archive metadata & filename
         function formatChapterName(filename, metaTitle) {
             if (metaTitle && typeof metaTitle === 'string' && metaTitle.trim().length > 0) {
                 return metaTitle.trim();
@@ -1054,6 +1072,65 @@
             }
             result.push(cur.trim());
             return result;
+        }
+
+        // --- ID3 EMBEDDED COVER EXTRACTION ---
+        function loadId3CoverArt(audioUrl, fallbackUrl) {
+            if (currentObjectUrl) {
+                URL.revokeObjectURL(currentObjectUrl);
+                currentObjectUrl = null;
+            }
+
+            if (typeof jsmediatags !== 'undefined') {
+                jsmediatags.read(audioUrl, {
+                    onSuccess: function(tag) {
+                        const picture = tag.tags.picture;
+                        if (picture) {
+                            let base64String = "";
+                            for (let i = 0; i < picture.data.length; i++) {
+                                base64String += String.fromCharCode(picture.data[i]);
+                            }
+                            const base64 = "data:" + picture.format + ";base64," + window.btoa(base64String);
+                            mainAlbumCover.src = base64;
+                            updateMediaSessionArtwork(base64);
+                            return;
+                        }
+                        applyFallbackCover(fallbackUrl);
+                    },
+                    onError: function() {
+                        applyFallbackCover(fallbackUrl);
+                    }
+                });
+            } else {
+                applyFallbackCover(fallbackUrl);
+            }
+        }
+
+        function applyFallbackCover(fallbackUrl) {
+            mainAlbumCover.src = fallbackUrl;
+            mainAlbumCover.onerror = () => {
+                if (currentCollectionId && currentCollectionId !== 'custom') {
+                    mainAlbumCover.src = `https://archive.org/services/img/${currentCollectionId}`;
+                }
+            };
+            updateMediaSessionArtwork(fallbackUrl);
+        }
+
+        function updateMediaSessionArtwork(coverUrl) {
+            if ('mediaSession' in navigator) {
+                const curCol = COLLECTIONS.find(c => c.id === currentCollectionId);
+                const curChapter = currentChapters[chapterSelect.value];
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    title: curChapter ? curChapter.name : "Shafin's AudioBook",
+                    artist: curCol ? curCol.name : "Archive Audio",
+                    album: curCol ? (curCol.group || "Audiobooks") : "",
+                    artwork: [
+                        { src: coverUrl, sizes: '96x96', type: 'image/jpeg' },
+                        { src: coverUrl, sizes: '256x256', type: 'image/jpeg' },
+                        { src: coverUrl, sizes: '512x512', type: 'image/jpeg' }
+                    ]
+                });
+            }
         }
 
         // --- MODAL SETTINGS ---
@@ -1108,7 +1185,7 @@
                 localStorage.setItem(STORAGE_KEY_GIST, GIST_ID);
 
                 modalStatusText.textContent = "Connected and saved!";
-                modalStatusText.style.color = "var(--accent-radio)";
+                modalStatusText.style.color = "var(--primary)";
 
                 setTimeout(() => {
                     syncModal.classList.remove('active');
@@ -1213,7 +1290,7 @@
 
         lockToggleBtn.addEventListener('click', toggleControlsLock);
 
-        // --- FETCH CHAPTERS & PARSE TITLES ---
+        // --- FETCH CHAPTERS ---
         async function fetchChapterList(identifier) {
             statusDiv.textContent = "Loading chapters from Archive.org...";
             try {
@@ -1273,31 +1350,6 @@
             });
         }
 
-        function updateAlbumCover(identifier, sheetIcon) {
-            let coverUrl = sheetIcon || `https://archive.org/services/img/${identifier}`;
-            mainAlbumCover.src = coverUrl;
-            mainAlbumCover.onerror = () => {
-                if (mainAlbumCover.src !== `https://archive.org/services/img/${identifier}`) {
-                    mainAlbumCover.src = `https://archive.org/services/img/${identifier}`;
-                }
-            };
-
-            if ('mediaSession' in navigator) {
-                const curCol = COLLECTIONS.find(c => c.id === currentCollectionId);
-                const curChapter = currentChapters[chapterSelect.value];
-                navigator.mediaSession.metadata = new MediaMetadata({
-                    title: curChapter ? curChapter.name : "Shafin's AudioBook",
-                    artist: curCol ? curCol.name : "Archive Audio",
-                    album: curCol ? (curCol.group || "Audiobooks") : "",
-                    artwork: [
-                        { src: coverUrl, sizes: '96x96', type: 'image/jpeg' },
-                        { src: coverUrl, sizes: '256x256', type: 'image/jpeg' },
-                        { src: coverUrl, sizes: '512x512', type: 'image/jpeg' }
-                    ]
-                });
-            }
-        }
-
         function populateChapterSelect(chapters) {
             chapterSelect.innerHTML = '';
             chapters.forEach((chapter, index) => {
@@ -1339,6 +1391,11 @@
 
             updateTrackMetadataDisplay(chapter);
 
+            // Attempt to load ID3 embedded image; fallback to collection thumbnail
+            const curCol = COLLECTIONS.find(c => c.id === currentCollectionId);
+            const fallbackCover = (curCol && curCol.icon) ? curCol.icon : `https://archive.org/services/img/${currentCollectionId}`;
+            loadId3CoverArt(chapter.url, fallbackCover);
+
             if (seekOffset !== null) {
                 const applyOffset = () => {
                     if (audio.duration && isFinite(audio.duration)) {
@@ -1355,6 +1412,43 @@
 
             prefetchAdjacentChapters(index);
         }
+
+        // --- RESUME LAST PLAYED TRACK & POSITION ---
+        async function resumeLastPlayed() {
+            let targetCollectionId = null;
+            let targetChapterIndex = 0;
+            let targetPosition = 0;
+
+            if (history && history.length > 0) {
+                const lastHistory = history[0];
+                targetCollectionId = lastHistory.collectionId;
+                targetChapterIndex = lastHistory.chapterIndex || 0;
+                targetPosition = lastHistory.playbackPosition || 0;
+            } else if (lastSyncedIndex >= 0) {
+                targetCollectionId = currentCollectionId;
+                targetChapterIndex = lastSyncedIndex;
+                targetPosition = lastSyncedTime || 0;
+            }
+
+            if (!targetCollectionId) {
+                statusDiv.textContent = "No previous playback history found.";
+                return;
+            }
+
+            statusDiv.textContent = `Resuming last played track...`;
+
+            if (targetCollectionId !== currentCollectionId) {
+                collectionSelect.value = targetCollectionId;
+                await switchCollection(targetCollectionId);
+            }
+
+            if (currentChapters[targetChapterIndex]) {
+                await loadChapter(targetChapterIndex, true, targetPosition);
+                statusDiv.textContent = `Resumed from ${formatTime(targetPosition)}`;
+            }
+        }
+
+        resumeLastBtn.addEventListener('click', resumeLastPlayed);
 
         // --- SHUFFLE BUTTON ---
         shuffleBtn.addEventListener('click', () => {
@@ -1382,8 +1476,6 @@
             populateChapterSelect(currentChapters);
             currentCollectionId = "custom";
             metaCollectionName.textContent = "Custom Stream";
-            mainAlbumCover.src = "https://img.icons8.com/?size=96&id=rRRmNzuBSYaF&format=png";
-
             loadChapter(0, true);
             statusDiv.textContent = `Loaded custom audio link.`;
         });
@@ -1412,7 +1504,6 @@
             if (randomColl.id !== currentCollectionId) {
                 collectionSelect.value = randomColl.id;
                 currentCollectionId = randomColl.id;
-                updateAlbumCover(randomColl.id, randomColl.icon);
                 currentChapters = await fetchChapterList(randomColl.id);
                 populateChapterSelect(currentChapters);
             }
@@ -1425,6 +1516,9 @@
             const targetChapter = currentChapters[randomChapterIdx];
             statusDiv.textContent = `📻 Radio: ${targetChapter.name}`;
             updateTrackMetadataDisplay(targetChapter);
+
+            const fallbackCover = randomColl.icon || `https://archive.org/services/img/${randomColl.id}`;
+            loadId3CoverArt(targetChapter.url, fallbackCover);
 
             const playUrl = await fetchWithCache(targetChapter.url);
             audio.src = playUrl;
@@ -1813,7 +1907,6 @@
                     if (collection) {
                         collectionSelect.value = collection.id;
                         currentCollectionId = collection.id;
-                        updateAlbumCover(collection.id, collection.icon);
                         currentChapters = await fetchChapterList(collection.id);
                         populateChapterSelect(currentChapters);
 
@@ -1827,7 +1920,7 @@
                             volumeLabel.textContent = Math.round(cloudState.volume * 100) + "%";
                         }
 
-                        statusDiv.textContent = `Resumed: ${collection.name}`;
+                        statusDiv.textContent = `Ready: ${collection.name}`;
                         return;
                     }
                 }
@@ -1842,7 +1935,6 @@
         async function switchCollection(id) {
             currentCollectionId = id;
             const currentItem = COLLECTIONS.find(c => c.id === id);
-            updateAlbumCover(id, currentItem ? currentItem.icon : null);
 
             currentChapters = await fetchChapterList(id);
             populateChapterSelect(currentChapters);
