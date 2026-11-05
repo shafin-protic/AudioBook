@@ -75,7 +75,6 @@
             position: relative;
         }
 
-        /* Header */
         .header {
             display: flex;
             justify-content: space-between;
@@ -102,7 +101,6 @@
             gap: 8px;
         }
 
-        /* Equalizer Animation Header Indicator */
         .wave-container {
             display: flex;
             align-items: flex-end;
@@ -156,7 +154,6 @@
             color: var(--danger);
         }
 
-        /* Status & Resume Bar */
         .status-row {
             display: flex;
             justify-content: space-between;
@@ -208,7 +205,6 @@
             transform: scale(1.04);
         }
 
-        /* Album Artwork Card */
         .album-art-wrapper {
             display: flex;
             justify-content: center;
@@ -230,7 +226,6 @@
             transform: scale(1.02);
         }
 
-        /* Current Track Details & Download */
         .track-metadata-card {
             background: var(--surface-elevated);
             border-radius: var(--radius-md);
@@ -287,7 +282,6 @@
             transform: scale(1.03);
         }
 
-        /* Custom URL Input Bar */
         .custom-url-section {
             display: flex;
             gap: 8px;
@@ -328,7 +322,6 @@
             border-color: var(--primary);
         }
 
-        /* Lock state */
         .lockable.is-locked {
             opacity: 0.35 !important;
             pointer-events: none !important;
@@ -385,7 +378,6 @@
             color: var(--text-main);
         }
 
-        /* Progress Bar */
         .progress-group {
             margin: 18px 0 14px;
         }
@@ -434,7 +426,6 @@
             transform: scale(1.2);
         }
 
-        /* Controls & Centered Button */
         .player-controls {
             display: flex;
             align-items: center;
@@ -519,7 +510,6 @@
             to { transform: rotate(360deg); }
         }
 
-        /* Volume & Speed */
         .extra-settings {
             display: flex;
             align-items: center;
@@ -561,7 +551,6 @@
             font-variant-numeric: tabular-nums;
         }
 
-        /* Secondary Actions */
         .secondary-actions {
             display: flex;
             justify-content: space-between;
@@ -596,7 +585,6 @@
             color: var(--primary);
         }
 
-        /* Tabs */
         .tabs-nav {
             display: flex;
             border-bottom: 1px solid var(--surface-border);
@@ -841,7 +829,6 @@
             <button class="btn-resume-last lockable" id="resumeLastBtn" title="Play from last played track & position">▶ Last Played</button>
         </div>
 
-        <!-- Clean native audio element -->
         <audio id="audioPlayer" preload="metadata"></audio>
 
         <!-- Dynamic Cover Image -->
@@ -860,9 +847,9 @@
             <a href="#" id="trackDownloadBtn" class="btn-tiny-dl" download target="_blank" title="Download Audio File">⬇️ Download</a>
         </div>
 
-        <!-- Custom Audio Link Bar -->
+        <!-- Custom Audio Link Bar (Isolated against autocomplete) -->
         <div class="custom-url-section lockable">
-            <input type="url" id="customAudioInput" class="custom-url-input" placeholder="Paste direct audio URL (.mp3, .m4a)..." value="" autocomplete="off">
+            <input type="text" id="customAudioInput" name="stream_media_url_direct_input" class="custom-url-input" placeholder="Paste direct audio URL (.mp3, .m4a)..." value="" autocomplete="new-password">
             <button class="btn-custom-load" id="loadCustomAudioBtn">Play URL</button>
         </div>
 
@@ -889,7 +876,7 @@
             <button class="btn-ctrl lockable" id="prevChapterBtn" title="Previous Track">⏮</button>
             <button class="btn-ctrl lockable" id="rewind10Btn" title="Rewind 10s">⏪ 10s</button>
             
-            <button class="btn-ctrl btn-main" id="playPauseBtn" title="Play / Pause">
+            <button class="btn-ctrl btn-main" id="playPauseBtn" title="Play / Pause (Space)">
                 <span class="btn-icon-content" id="playPauseIconContainer">
                     <svg class="icon-play" viewBox="0 0 24 24"><polygon points="6 4 20 12 6 20 6 4"></polygon></svg>
                 </span>
@@ -1045,11 +1032,25 @@
         const inputGistId = document.getElementById('inputGistId');
         const modalStatusText = document.getElementById('modalStatusText');
 
-        // --- AUTO PITCH PRESERVATION SETUP ---
-        function applyPitchPreservation() {
-            audio.preservesPitch = true;
-            if (audio.mozPreservesPitch !== undefined) audio.mozPreservesPitch = true;
-            if (audio.webkitPreservesPitch !== undefined) audio.webkitPreservesPitch = true;
+        // --- KEYBOARD SHORTCUTS ---
+        window.addEventListener('keydown', (e) => {
+            const activeTag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
+            const isTyping = activeTag === 'input' || activeTag === 'textarea' || document.activeElement.isContentEditable;
+            
+            // Spacebar: Toggle play/pause
+            if (e.code === 'Space') {
+                if (isTyping) return; // Do not trigger when typing inside inputs
+                e.preventDefault();
+                togglePlayback();
+            }
+        });
+
+        function togglePlayback() {
+            if (audio.paused) {
+                audio.play().catch(e => console.log("Play interrupted:", e));
+            } else {
+                audio.pause();
+            }
         }
 
         // --- UTILITIES ---
@@ -1437,7 +1438,6 @@
 
             const playbackSource = await fetchWithCache(chapter.url);
             audio.src = playbackSource;
-            applyPitchPreservation();
             audio.load();
             chapterSelect.value = index;
             isApplyingCloudState = false;
@@ -1459,7 +1459,6 @@
             }
 
             if (autoPlay) {
-                applyPitchPreservation();
                 audio.play().catch(e => console.log("Autoplay blocked:", e));
             }
 
@@ -1575,7 +1574,6 @@
 
             const playUrl = await fetchWithCache(targetChapter.url);
             audio.src = playUrl;
-            applyPitchPreservation();
             audio.load();
 
             const onMetadataLoaded = () => {
@@ -1583,7 +1581,6 @@
                     const randomPoint = Math.random() * (audio.duration - 30);
                     audio.currentTime = randomPoint;
                 }
-                applyPitchPreservation();
                 audio.play().catch(e => console.log("Radio playback interrupted:", e));
                 audio.removeEventListener('loadedmetadata', onMetadataLoaded);
             };
@@ -1723,7 +1720,6 @@
         });
 
         audio.addEventListener('play', () => { 
-            applyPitchPreservation();
             updatePlayPauseUI(); 
             if (!isRadioMode) statusDiv.textContent = "Playing..."; 
         });
@@ -1741,7 +1737,6 @@
 
         audio.addEventListener('loadedmetadata', () => {
             updateSeekSlider();
-            applyPitchPreservation();
             if (!isRadioMode && !isApplyingCloudState && currentCollectionId && currentChapters[chapterSelect.value]) {
                 addToHistory();
             }
@@ -1762,10 +1757,7 @@
             scheduleSync();
         });
 
-        playPauseBtn.addEventListener('click', () => {
-            applyPitchPreservation();
-            if (audio.paused) audio.play(); else audio.pause();
-        });
+        playPauseBtn.addEventListener('click', togglePlayback);
 
         seekSlider.addEventListener('input', () => {
             audio.currentTime = parseFloat(seekSlider.value);
@@ -1812,7 +1804,6 @@
 
         speedSelect.addEventListener('change', (e) => {
             audio.playbackRate = parseFloat(e.target.value);
-            applyPitchPreservation();
             scheduleSync();
         });
 
@@ -1985,7 +1976,6 @@
                         isApplyingCloudState = true;
                         loadChapter(cloudState.chapterIndex, false, cloudState.currentTime);
                         audio.playbackRate = cloudState.playbackRate || 1.0;
-                        applyPitchPreservation();
                         speedSelect.value = audio.playbackRate;
                         if (cloudState.volume !== undefined) {
                             audio.volume = cloudState.volume;
@@ -2019,8 +2009,9 @@
         }
 
         async function init() {
+            // Force reset the input bar value upon execution
             customAudioInput.value = "";
-            applyPitchPreservation();
+            setTimeout(() => { customAudioInput.value = ""; }, 150);
 
             await loadCollectionsFromSheet();
             populateCollectionSelect();
